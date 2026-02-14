@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Pgvector.EntityFrameworkCore;
+using System.Linq; // add to CatalogApi.cs or GlobalUsings.cs
 
 namespace eShop.Catalog.API;
 
@@ -56,7 +57,10 @@ public static class CatalogApi
         [AsParameters] CatalogServices services,
         int[] ids)
     {
-        var items = await services.Context.CatalogItems.Where(item => ids.Contains(item.Id)).ToListAsync();
+        // Explicitly use Enumerable.Contains to avoid ReadOnlySpan overload
+        var items = await services.Context.CatalogItems
+            .Where(item => Enumerable.Contains(ids, item.Id))
+            .ToListAsync();
         return TypedResults.Ok(items);
     }
 
